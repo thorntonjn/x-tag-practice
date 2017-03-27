@@ -1,0 +1,76 @@
+<!-- Imports x-tag -->
+<script src="/components/x-tag-core/src/core.js"></script>
+<script src="https://rawgit.com/x-tag/core/master/dist/x-tag-core.js"></script>
+
+
+<!-- Defines element markup -->
+<template>
+    <p>XTag verses Polymer <strong></strong> :)</p>
+    <ul>Why I Like Polymer Better ?
+        <li> This library is not from microsoft </li>
+        <li> Polymer uses all four parts of web components. (Template Binding, CustomElement APIs, ShadowDom, HTMLImports)  </li>
+        <li> Xtag is only for extending elements, no shadow dom </li>
+        <li> I miss polymers syntactic sugur  </li>
+        <li> unifies APIs and gives you packaging into creating custom components  </li>
+        <li> Polymer searches for element and creates shadow dom automatically providing (encapsulation, avoids style bleed, locally scopes dom trees)  </li>
+        <li> Polymer provides a declarative polymer element,  this was removed from spec.)  </li>
+        <li> XTag requires you to create a template and then clone it later into your elements light DOM</li>
+    </ul>
+    <ul>Why I Like X-Tag Better ?
+        <li> While Polymer seems to be the perfect answer to how to use Web Components APIs in combination, X-Tag breaks its code base down to what is really needed in all cases (which is Custom Elements) and lets you opt-in for additional technologies like Shadow DOM or HTML Templates if needed. That makes the code smaller and faster. Also, reducing dependencies to only one technology, makes the code usable in more browser environments. </li>
+    </ul>
+</template>
+
+<script>
+(function(window, document, undefined) {
+    // Refers to the "importer", which is index.html
+    var thatDoc = document;
+
+    // Refers to the "importee", which is src/hello-world.html
+    var thisDoc = document._currentScript.ownerDocument;
+
+    // Gets content from <template>
+    var template = thisDoc.querySelector('template').content;
+
+    xtag.register('hello-world', {
+        lifecycle: {
+            created: function() {
+                // Caches <strong> DOM query
+                this.strong = template.querySelector('strong');
+
+                // Creates the shadow root
+                this.shadowRoot = this.createShadowRoot();
+
+                this.uiSetWho();
+            },
+            attributeChanged: function() {
+                this.uiSetWho();
+            }
+        },
+        accessors: {
+            who: {
+                attribute: {},
+                get: function(){
+                    return this.getAttribute('who') || "World"
+                },
+                set: function(value){
+                    this.xtag.data.who = value;
+                }
+            }
+        },
+        methods: {
+            uiSetWho: function() {
+                // Sets "who" value into <strong>
+                this.strong.textContent = this.who;
+
+                // Removes shadow root content
+                this.shadowRoot.innerHTML = '';
+
+                // Adds a template clone into shadow root
+                var clone = thatDoc.importNode(template, true);
+                this.shadowRoot.appendChild(clone);
+            }
+        }
+    });
+})(window, document);
+</script>
